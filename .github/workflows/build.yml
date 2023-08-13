@@ -16,3 +16,8 @@ jobs:
         run: chmod +x gradlew
       - name: Build robot code
         run: ./gradlew build
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
+        with:
+          name: test-results
+          path: build/test-results/test/
