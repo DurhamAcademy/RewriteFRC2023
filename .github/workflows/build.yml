@@ -16,3 +16,6 @@ jobs:
         run: chmod +x gradlew
       - name: Build robot code
         run: ./gradlew build
+      - name: Test Reporting
+        uses: phoenix-actions/test-reporting@v12
+
