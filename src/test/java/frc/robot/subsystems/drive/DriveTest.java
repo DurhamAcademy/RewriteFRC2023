@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -10,6 +11,12 @@ import java.util.Random;
 import static frc.robot.subsystems.drive.Drive.WHEEL_RADIUS_METERS;
 
 class DriveTest {
+
+    /**
+     * Should be constant throughout all tests
+     */
+    Random rand = new Random();
+
     DriveIO.DriveIOInputs driveIOInputs;
     DriveIO.DriveIOInputs newDriveIOInputs;
 
@@ -59,11 +66,10 @@ class DriveTest {
         driveIOLeftVoltage = 0.0;
     }
 
-    @Test
+    @RepeatedTest(10)
     void drivePercent() {
-        var rand = new Random();
-        var newDriveIOLeftPercent = rand.nextDouble();
-        var newDriveIORightPercent = rand.nextDouble();
+        var newDriveIOLeftPercent = (rand.nextDouble() * 2) - 1;
+        var newDriveIORightPercent = (rand.nextDouble() * 2) - 1;
 
         drive.drivePercent(newDriveIOLeftPercent, newDriveIORightPercent);
 
@@ -71,13 +77,16 @@ class DriveTest {
         Assertions.assertEquals(newDriveIORightPercent * 12.0, driveIORightVoltage);
     }
 
-    @Test
+    @RepeatedTest(10)
     void driveArcade() {
         driveIOLeftVoltage = 0.0;
         driveIORightVoltage = 0.0;
-        drive.driveArcade(0.7, 0.4);
+        var newDriveIOLeftVoltage = (rand.nextDouble() * 2) - 1;
+        var newDriveIORightVoltage = (rand.nextDouble() * 2) - 1;
 
-        var speeds = DifferentialDrive.arcadeDriveIK(0.7, 0.4, true);
+        drive.driveArcade(newDriveIOLeftVoltage, newDriveIORightVoltage);
+
+        var speeds = DifferentialDrive.arcadeDriveIK(newDriveIOLeftVoltage, newDriveIORightVoltage, true);
 
         Assertions.assertEquals(speeds.left * 12.0, driveIOLeftVoltage);
         Assertions.assertEquals(speeds.right * 12.0, driveIORightVoltage);
