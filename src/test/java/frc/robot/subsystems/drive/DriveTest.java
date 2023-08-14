@@ -14,6 +14,8 @@ class DriveTest {
      */
     Random rand = new Random();
 
+    int updateInputsCallCount = 0;
+
     DriveIO.DriveIOInputs driveIOInputs;
     DriveIO.DriveIOInputs newDriveIOInputs;
 
@@ -31,6 +33,7 @@ class DriveTest {
         driveIO = new DriveIO() {
             @Override
             public void updateInputs(DriveIOInputs inputs) {
+                updateInputsCallCount++;
                 try {
                     driveIOInputs = (DriveIOInputs) inputs.clone();
                 } catch (CloneNotSupportedException e) {
@@ -39,10 +42,10 @@ class DriveTest {
                     Assertions.fail("Cannot cast clone of inputs to DriveIOInputs", e);
                 }
                 inputs.gyroYawRad = 1.0;
-                inputs.leftPositionRad = 3.6;
-                inputs.leftVelocityRadPerSec = 0.4;
-                inputs.rightPositionRad = 4.11;
-                inputs.rightVelocityRadPerSec = 0.1;
+                inputs.leftPositionRad = rand.nextDouble() * 6;
+                inputs.leftVelocityRadPerSec = rand.nextDouble() * 0.5;
+                inputs.rightPositionRad = rand.nextDouble() * 6;
+                inputs.rightVelocityRadPerSec = rand.nextDouble() * 0.5;
                 try {
                     newDriveIOInputs = (DriveIOInputs) inputs.clone();
                 } catch (CloneNotSupportedException e) {
@@ -61,6 +64,14 @@ class DriveTest {
         drive = new Drive(driveIO);
         driveIORightVoltage = 0.0;
         driveIOLeftVoltage = 0.0;
+    }
+
+    @Test
+    @DisplayName("updateInputs() called once during periodic")
+    void callCountTest() {
+        drive.periodic();
+
+        Assertions.assertEquals(1, updateInputsCallCount, "update inputs not called only once in periodic (and only periodic)");
     }
 
     @RepeatedTest(10)
