@@ -1,10 +1,7 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.Random;
 
@@ -67,6 +64,7 @@ class DriveTest {
     }
 
     @RepeatedTest(10)
+    @DisplayName("drivePercent() Correct voltage test")
     void drivePercent() {
         var newDriveIOLeftPercent = (rand.nextDouble() * 2) - 1;
         var newDriveIORightPercent = (rand.nextDouble() * 2) - 1;
@@ -78,6 +76,7 @@ class DriveTest {
     }
 
     @RepeatedTest(10)
+    @DisplayName("driveArcade() Correct voltage test")
     void driveArcade() {
         driveIOLeftVoltage = 0.0;
         driveIORightVoltage = 0.0;
@@ -93,6 +92,7 @@ class DriveTest {
     }
 
     @Test
+    @DisplayName("stop() Correct voltage test")
     void stop() {
         driveIOLeftVoltage = 3.0;
         driveIORightVoltage = 5.2;
@@ -104,17 +104,21 @@ class DriveTest {
     }
 
     @Test
+    @DisplayName("getPose() Getter Test")
     void getPose() {
         Assertions.assertEquals(0.0, drive.getPose().getX());
         Assertions.assertEquals(0.0, drive.getPose().getY());
         Assertions.assertEquals(0.0, drive.getPose().getRotation().getRadians());
+
         drive.periodic();
+
         Assertions.assertNotEquals(0.0, drive.getPose().getX());
         Assertions.assertNotEquals(0.0, drive.getPose().getY());
         Assertions.assertNotEquals(0.0, drive.getPose().getRotation().getRadians());
     }
 
     @Test
+    @DisplayName("getLeftPositionMeters() Getter Test")
     void getLeftPositionMeters() {
         Assertions.assertEquals(0.0, drive.getLeftPositionMeters());
 
@@ -125,6 +129,7 @@ class DriveTest {
     }
 
     @Test
+    @DisplayName("getRightPositionMeters() Getter Test")
     void getRightPositionMeters() {
         Assertions.assertEquals(0.0, drive.getRightPositionMeters());
 
@@ -135,6 +140,7 @@ class DriveTest {
     }
 
     @Test
+    @DisplayName("getLeftVelocityMeters() Getter Test")
     void getLeftVelocityMeters() {
         Assertions.assertEquals(0.0, drive.getLeftVelocityMeters());
 
@@ -145,6 +151,7 @@ class DriveTest {
     }
 
     @Test
+    @DisplayName("getRightVelocityMeters() Getter Test")
     void getRightVelocityMeters() {
         Assertions.assertEquals(0.0, drive.getRightVelocityMeters());
 
