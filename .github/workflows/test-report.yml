@@ -1,0 +1,17 @@
+name: 'Test Report'
+on:
+  workflow_run:
+    workflows: ['build']                     # runs after CI workflow
+    types:
+      - completed
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: phoenix-actions/test-reporting@v8
+      id: test-report                     # Set ID reference for step
+      with:
+        artifact: test-results            # artifact name
+        name: Unit Tests            # Name of the check run which will be created
+        path: TEST-*.xml    # Path to test results
+        reporter: java-junit        # Format of test results
