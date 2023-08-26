@@ -17,7 +17,7 @@ public class DriveWithFlywheelAuto extends SequentialCommandGroup {
    */
   public DriveWithFlywheelAuto(Drive drive, Flywheel flywheel) {
     addCommands(
-        new StartEndCommand(() -> drive.drivePercent(drivePercent, -drivePercent), drive::stop, drive)
+            new StartEndCommand(() -> drive.driveArcade(0.0, drivePercent), drive::stop, drive)
             .withTimeout(driveDuration),
         new StartEndCommand(() -> flywheel.runVelocity(flywheelSpeed), flywheel::stop, flywheel)
             .withTimeout(flywheelDuration));

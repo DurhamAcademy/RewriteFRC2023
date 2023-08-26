@@ -16,8 +16,9 @@ package frc.robot;
  */
 public final class Constants {
   public static final Mode currentMode = Mode.SIM;
+    public static double loopPeriodSecs = 0.02;
 
-  public enum Mode {
+    public enum Mode {
     /** Running on a real robot. */
     REAL,
 

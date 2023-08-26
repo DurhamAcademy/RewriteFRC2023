@@ -14,9 +14,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveWithFlywheelAuto;
 import frc.robot.commands.SpinAuto;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveIO;
-import frc.robot.subsystems.drive.DriveIOSim;
-import frc.robot.subsystems.drive.DriveIOSparkMax;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOFalcon500;
+import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
@@ -47,25 +47,45 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+      var FRDriveMotorId = 10;
+      var BLDriveMotorId = 11;
+      var FLDriveMotorId = 12;
+      var BRDriveMotorId = 13;
+
+      var FRTurnMotorId = 14;
+      var BLTurnMotorId = 15;
+      var FLTurnMotorId = 16;
+      var BRTurnMotorId = 17;
+
+      var FRTurnEncoderId = 6;
+      var BLTurnEncoderId = 7;
+      var FLTurnEncoderId = 8;
+      var BRTurnEncoderId = 9;
     switch (Constants.currentMode) {
       // Real robot, instantiate hardware IO implementations
       case REAL:
-        drive = new Drive(new DriveIOSparkMax());
+          drive = new Drive(
+                  new ModuleIOFalcon500(FRTurnMotorId, FRDriveMotorId, false, false, FRTurnEncoderId),
+                  new ModuleIOFalcon500(BLTurnMotorId, BLDriveMotorId, false, false, BLTurnEncoderId),
+                  new ModuleIOFalcon500(FLTurnMotorId, FLDriveMotorId, false, false, FLTurnEncoderId),
+                  new ModuleIOFalcon500(BRTurnMotorId, BRDriveMotorId, false, false, BRTurnEncoderId)
+          );
         flywheel = new Flywheel(new FlywheelIOSparkMax());
-        // drive = new Drive(new DriveIOFalcon500());
-        // flywheel = new Flywheel(new FlywheelIOFalcon500());
         break;
 
       // Sim robot, instantiate physics sim IO implementations
       case SIM:
-        drive = new Drive(new DriveIOSim());
+          drive = new Drive(new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim());
         flywheel = new Flywheel(new FlywheelIOSim());
         break;
 
       // Replayed robot, disable IO implementations
       default:
-        drive = new Drive(new DriveIO() {
-        });
+          drive = new Drive(new ModuleIO() {
+          }, new ModuleIO() {
+          }, new ModuleIO() {
+          }, new ModuleIO() {
+          });
         flywheel = new Flywheel(new FlywheelIO() {
         });
         break;
