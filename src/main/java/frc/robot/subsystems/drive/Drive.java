@@ -1,11 +1,10 @@
 package frc.robot.subsystems.drive;
 
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -14,7 +13,11 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.PhotonPoseEstimator;
+
+import java.io.IOException;
 
 import static java.lang.Math.PI;
 
@@ -24,6 +27,13 @@ public class Drive extends SubsystemBase {
           new ModuleIOInputsAutoLogged[]{new ModuleIOInputsAutoLogged(),
                   new ModuleIOInputsAutoLogged(), new ModuleIOInputsAutoLogged(),
                   new ModuleIOInputsAutoLogged()};
+
+  private final GyroIO gyroIO;
+  private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+
+  private final VisionIO visionIO;
+  private final VisionIOInputsAutoLogged visionInputs = new VisionIOInputsAutoLogged();
+  private final CameraCamera alterCam = new CameraCamera();
 
   public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(3.0);
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
@@ -40,6 +50,17 @@ public class Drive extends SubsystemBase {
                   new SwerveModulePosition(0, new Rotation2d()),
                   new SwerveModulePosition(0, new Rotation2d())},
           new Pose2d());
+  PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(
+          AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField(),
+          PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP,
+          alterCam,
+          new Transform3d(
+                  new Translation3d(-0.258, 0.0, 0.137),
+                  new Rotation3d(
+                          0.0,
+                          Units.degreesToRadians(-12.0),
+                          Units.degreesToRadians(180.0))));
+
   boolean testMode = false;
   double testTime = 0.0;
   ProfiledPIDController anglePid;
@@ -53,12 +74,14 @@ public class Drive extends SubsystemBase {
    * @param frModuleIO
    * @param blModuleIO
    * @param brModuleIO
+   * @param visionIO
    */
   public Drive(ModuleIO flModuleIO,
                ModuleIO frModuleIO,
                ModuleIO blModuleIO,
-               ModuleIO brModuleIO) {
-    this(flModuleIO, frModuleIO, blModuleIO, brModuleIO, false);
+               ModuleIO brModuleIO,
+               GyroIO gyroIO, VisionIO visionIO) throws IOException {
+    this(flModuleIO, frModuleIO, blModuleIO, brModuleIO, gyroIO, visionIO, false);
   }
 
   /** Creates a new Drive. */
@@ -66,7 +89,11 @@ public class Drive extends SubsystemBase {
                ModuleIO frModuleIO,
                ModuleIO blModuleIO,
                ModuleIO brModuleIO,
-               Boolean testMode) {
+               GyroIO gyroIO,
+               VisionIO visionIO,
+               Boolean testMode) throws IOException {
+    this.gyroIO = gyroIO;
+    this.visionIO = visionIO;
     moduleIOs[0] = flModuleIO;
     moduleIOs[1] = frModuleIO;
     moduleIOs[2] = blModuleIO;
@@ -90,7 +117,29 @@ public class Drive extends SubsystemBase {
       Logger.getInstance().processInputs(String.format("module [%d]", i), inputs[i]);
     }
 
+    gyroIO.updateInputs(gyroInputs);
+    Logger.getInstance().processInputs("gyro", gyroInputs);
 
+    visionIO.updateInputs(visionInputs);
+    Logger.getInstance().processInputs("camera", visionInputs);
+    alterCam.setInputs(visionInputs);
+    photonPoseEstimator.setReferencePose(getPose());
+    photonPoseEstimator.setPrimaryStrategy(PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP);
+    photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
+    var visionPose = photonPoseEstimator.update(visionInputs.cameraResult);
+    visionPose.ifPresent(estimatedRobotPose ->
+            estimatedRobotPose.targetsUsed.forEach(photonTrackedTarget ->
+                    Logger.getInstance().recordOutput(
+                            "Tag " + photonTrackedTarget.hashCode(),
+                            new Pose3d(
+                                    photonTrackedTarget.getBestCameraToTarget().getTranslation(),
+                                    photonTrackedTarget.getBestCameraToTarget().getRotation()
+                            )
+                    )));
+    visionPose.ifPresent(estimatedRobotPose -> poseEstimator.addVisionMeasurement(
+            estimatedRobotPose.estimatedPose.toPose2d(),
+            estimatedRobotPose.timestampSeconds
+    ));
     // Update odometry and log the new pose
     var modulePositions = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {
@@ -99,29 +148,33 @@ public class Drive extends SubsystemBase {
     }
     poseEstimator.updateWithTime(
             (testMode) ? testTime : Timer.getFPGATimestamp(),
-            new Rotation2d(),
+            Rotation2d.fromDegrees(gyroInputs.yaw),
             modulePositions
     );
-    Logger.getInstance().recordOutput("Pose Estimator", poseEstimator.getEstimatedPosition());
+    Logger.getInstance().recordOutput("Pose Estimator", getPose());
     Logger.getInstance().recordOutput("SwerveModule " + 0,
             new SwerveModuleState(
-                    inputs[0].drivePositionRad * WHEEL_RADIUS_METERS,
+                    inputs[0].driveVelocityRadPerSec * WHEEL_RADIUS_METERS,
                     Rotation2d.fromRadians(inputs[0].turnAbsolutePositionRad)),
             new SwerveModuleState(
-                    inputs[1].drivePositionRad * WHEEL_RADIUS_METERS,
+                    inputs[1].driveVelocityRadPerSec * WHEEL_RADIUS_METERS,
                     Rotation2d.fromRadians(inputs[1].turnAbsolutePositionRad)),
             new SwerveModuleState(
-                    inputs[2].drivePositionRad * WHEEL_RADIUS_METERS,
+                    inputs[2].driveVelocityRadPerSec * WHEEL_RADIUS_METERS,
                     Rotation2d.fromRadians(inputs[2].turnAbsolutePositionRad)),
             new SwerveModuleState(
-                    inputs[3].drivePositionRad * WHEEL_RADIUS_METERS,
+                    inputs[3].driveVelocityRadPerSec * WHEEL_RADIUS_METERS,
                     Rotation2d.fromRadians(inputs[3].turnAbsolutePositionRad)));
   }
 
-  /** Run open loop based on stick positions. */
-  public void driveArcade(double xSpeed, double zRotation) {
-    var speeds = kinematics.toSwerveModuleStates(new ChassisSpeeds(xSpeed * 12, zRotation * 12, 0.0));
 
+  /** Run open loop based on stick positions. */
+  public void driveArcade(double xSpeed, double ySpeed, double zRotation, boolean fieldRelative) {
+    var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+            new ChassisSpeeds(xSpeed * 12, ySpeed * 12, 12 * zRotation),//.slewLimited(xSlewRateLimiter, ySlewRateLimiter, rotSlewRateLimiter),
+            getPose().getRotation()
+    );
+    var speeds = kinematics.toSwerveModuleStates(chassisSpeeds);
     for (int i = 0; i < speeds.length; i++) {
       var speed = speeds[i];
       moduleIOs[i].setDriveVoltage(speed.speedMetersPerSecond);
@@ -130,11 +183,11 @@ public class Drive extends SubsystemBase {
       var lastVel = anglePid.getSetpoint().velocity;
       var t = Timer.getFPGATimestamp();
       var dt = t - lastTime;
-      var pid = anglePid.calculate(inputs[i].turnPositionRad, rad);
+      var pid = anglePid.calculate(inputs[i].turnAbsolutePositionRad, rad);
       var anglePower = -(pid) + angleFF.calculate(
               lastVel,
               anglePid.getSetpoint().velocity,
-              0.02//minOf(dt,0.001) // stop possible divide by zero?
+              Constants.loopPeriodSecs//minOf(dt,0.001) // stop possible divide by zero?
       );
       moduleIOs[i].setTurnVoltage(anglePower);
     }

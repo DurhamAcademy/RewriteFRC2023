@@ -5,7 +5,12 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import frc.robot.Constants;
 
+import java.util.Optional;
+
 public class ModuleIOSim implements ModuleIO {
+    private Optional<Integer> id = Optional.empty();
+    private Optional<GyroIOSim> gyroSim = Optional.empty();
+
     private final FlywheelSim driveSim =
             new FlywheelSim(DCMotor.getFalcon500(1), 6.75, 0.025);
     private final FlywheelSim turnSim =
@@ -16,8 +21,15 @@ public class ModuleIOSim implements ModuleIO {
     private double driveAppliedVolts = 0.0;
     private double turnAppliedVolts = 0.0;
 
-    public void updateInputs(ModuleIOInputs inputs) {
+    public ModuleIOSim(int id, GyroIOSim gyroSim) {
+        this.id = Optional.of(id);
+        this.gyroSim = Optional.ofNullable(gyroSim);
+    }
 
+    public ModuleIOSim() {
+    }
+
+    public void updateInputs(ModuleIOInputs inputs) {
         driveSim.update(Constants.loopPeriodSecs);
         turnSim.update(Constants.loopPeriodSecs);
 
@@ -47,6 +59,7 @@ public class ModuleIOSim implements ModuleIO {
         inputs.turnCurrentAmps =
                 new double[]{Math.abs(turnSim.getCurrentDrawAmps())};
         inputs.turnTempCelsius = new double[]{};
+        gyroSim.ifPresent(gyroIOSim -> gyroIOSim.setInput(id.orElseThrow(), inputs));
     }
 
     public void setDriveVoltage(double volts) {

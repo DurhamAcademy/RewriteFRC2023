@@ -11,7 +11,7 @@ public class SpinAuto extends SequentialCommandGroup {
   /** Creates a new SpinAuto, which spins in place for ten seconds. */
   public SpinAuto(Drive drive) {
     addCommands(
-            new StartEndCommand(() -> drive.driveArcade(0.0, -drivePercent), drive::stop, drive)
+            new StartEndCommand(() -> drive.driveArcade(0.0, 0.0, -drivePercent, true), drive::stop, drive)
             .withTimeout(duration));
   }
 }

@@ -51,20 +51,7 @@ public interface ModuleIO {
 
         @Override
         protected Object clone() throws CloneNotSupportedException {
-            Object clone = super.clone();
-            ModuleIOInputsAutoLogged copy = new ModuleIOInputsAutoLogged();
-            copy.drivePositionRad = this.drivePositionRad;
-            copy.driveVelocityRadPerSec = this.driveVelocityRadPerSec;
-            copy.driveOutputVoltage = this.driveOutputVoltage;
-            copy.driveCurrentAmps = this.driveCurrentAmps.clone();
-            copy.driveTempCelsius = this.driveTempCelsius.clone();
-            copy.turnAbsolutePositionRad = this.turnAbsolutePositionRad;
-            copy.turnPositionRad = this.turnPositionRad;
-            copy.turnVelocityRadPerSec = this.turnVelocityRadPerSec;
-            copy.turnOutputVoltage = this.turnOutputVoltage;
-            copy.turnCurrentAmps = this.turnCurrentAmps.clone();
-            copy.turnTempCelsius = this.turnTempCelsius.clone();
-            return copy;
+            return super.clone();
         }
     }
 }

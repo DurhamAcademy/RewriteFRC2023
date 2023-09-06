@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,16 +14,15 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveWithFlywheelAuto;
 import frc.robot.commands.SpinAuto;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOFalcon500;
-import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+
+import java.io.IOException;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -46,7 +46,7 @@ public class RobotContainer {
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
-  public RobotContainer() {
+  public RobotContainer() throws IOException {
       var FRDriveMotorId = 10;
       var BLDriveMotorId = 11;
       var FLDriveMotorId = 12;
@@ -61,6 +61,8 @@ public class RobotContainer {
       var BLTurnEncoderId = 7;
       var FLTurnEncoderId = 8;
       var BRTurnEncoderId = 9;
+
+      var gyroID = 10;
     switch (Constants.currentMode) {
       // Real robot, instantiate hardware IO implementations
       case REAL:
@@ -68,14 +70,20 @@ public class RobotContainer {
                   new ModuleIOFalcon500(FRTurnMotorId, FRDriveMotorId, false, false, FRTurnEncoderId),
                   new ModuleIOFalcon500(BLTurnMotorId, BLDriveMotorId, false, false, BLTurnEncoderId),
                   new ModuleIOFalcon500(FLTurnMotorId, FLDriveMotorId, false, false, FLTurnEncoderId),
-                  new ModuleIOFalcon500(BRTurnMotorId, BRDriveMotorId, false, false, BRTurnEncoderId)
-          );
+                  new ModuleIOFalcon500(BRTurnMotorId, BRDriveMotorId, false, false, BRTurnEncoderId),
+                  new GyroIOReal(gyroID),
+                  new VisionIOPhoton());
         flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;
 
       // Sim robot, instantiate physics sim IO implementations
       case SIM:
-          drive = new Drive(new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim());
+          var gyroSim = new GyroIOSim(new Translation2d[]{new Translation2d(1.0, 1.0),
+                  new Translation2d(1.0, -1.0),
+                  new Translation2d(-1.0, 1.0),
+                  new Translation2d(-1.0, -1.0)});
+          drive = new Drive(new ModuleIOSim(0, gyroSim), new ModuleIOSim(1, gyroSim), new ModuleIOSim(2, gyroSim), new ModuleIOSim(3, gyroSim), gyroSim, new VisionIO() {
+          });
         flywheel = new Flywheel(new FlywheelIOSim());
         break;
 
@@ -85,6 +93,8 @@ public class RobotContainer {
           }, new ModuleIO() {
           }, new ModuleIO() {
           }, new ModuleIO() {
+          }, new GyroIO() {
+          }, new VisionIO() {
           });
         flywheel = new Flywheel(new FlywheelIO() {
         });
@@ -108,7 +118,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     drive.setDefaultCommand(
-        new RunCommand(() -> drive.driveArcade(-controller.getLeftY(), controller.getLeftX()), drive));
+            new RunCommand(() -> drive.driveArcade(controller.getLeftX(), controller.getLeftY(), controller.getRightX(), true), drive));
     controller.a()
         .whileTrue(new StartEndCommand(() -> flywheel.runVelocity(flywheelSpeedInput.get()), flywheel::stop, flywheel));
   }

@@ -11,45 +11,26 @@ public interface GyroIO {
     }
 
     default void configFactoryDefault() {
+    }
 
+    default void zeroGyroBias(int ms) {
+    }
+
+    default void zeroGyroBias() {
+        this.zeroGyroBias(0);
     }
 
     @AutoLog
     class GyroIOInputs {
-        double pitch;
-        double roll;
-        double yaw;
-        double[] gravityVector;
-        double uptime;
-        double temp;
-        double compassHeading;
-        short[] rawMagnetometer;
-        short[] biasedMagnetometer;
-
-        boolean FaultAccelFault;
-        boolean FaultGyroFault;
-        boolean FaultHardwareFault;
-        boolean FaultMagnetometerFault;
-        boolean FaultAPIError;
-        boolean FaultBootIntoMotion;
-        boolean FaultResetDuringEn;
-        boolean FaultSaturatedAccel;
-        boolean FaultSaturatedMag;
-        boolean FaultSaturatedRotVelocity;
-        boolean FaultUnderVoltage;
-
-        boolean StickyFaultAccelFault;
-        boolean StickyFaultGyroFault;
-        boolean StickyFaultHardwareFault;
-        boolean StickyFaultMagnetometerFault;
-        boolean StickyFaultAPIError;
-        boolean StickyFaultBootIntoMotion;
-        boolean StickyFaultResetDuringEn;
-        boolean StickyFaultSaturatedAccel;
-        boolean StickyFaultSaturatedMag;
-        boolean StickyFaultSaturatedRotVelocity;
-        boolean StickyFaultUnderVoltage;
-
+        double pitch = 0.0;
+        double roll = 0.0;
+        double yaw = 0.0;
+        double[] gravityVector = new double[0];
+        double uptime = 0.0;
+        double temp = 0.0;
+        double compassHeading = 0.0;
+        short[] rawMagnetometer = new short[0];
+        short[] biasedMagnetometer = new short[0];
     }
 }
 

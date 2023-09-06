@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.wpilibj.Timer;
 import org.junit.jupiter.api.*;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,12 +23,10 @@ class DriveTest {
     double driveIOTurnVoltage;
     double driveIODriveVoltage;
 
-    DriveIO driveIO;
-
     Drive drive;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         driveIOInputs = null;
         newDriveIOInputs = null;
         var moduleIOs = new ModuleIO[4];
@@ -68,7 +67,9 @@ class DriveTest {
                 }
             };
         }
-        drive = new Drive(moduleIOs[0], moduleIOs[1], moduleIOs[2], moduleIOs[3]);
+        drive = new Drive(moduleIOs[0], moduleIOs[1], moduleIOs[2], moduleIOs[3], new GyroIO() {
+        }, new VisionIO() {
+        });
         driveIODriveVoltage = 0.0;
         driveIOTurnVoltage = 0.0;
     }
