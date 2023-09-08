@@ -9,7 +9,7 @@ public interface ManipulatorIO {
         public double positionRad = 0.0;
         public double velocityRadPerSec = 0.0;
         public double appliedVolts = 0.0;
-        public double[] currentAmps = new double[] {};
+        public double[] currentAmps = new double[] {0.0};
     }
 
     /** Updates the set of loggable inputs. */
