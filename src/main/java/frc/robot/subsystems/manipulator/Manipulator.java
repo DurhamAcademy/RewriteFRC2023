@@ -8,7 +8,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Manipulator extends SubsystemBase {
     public ManipulatorIO io;
-    public ManipulatorIO.ManipulatorIOInputs inputs;
+    public ManipulatorIO.ManipulatorIOInputs inputs; //TODO figure out how inputs is set
 
     public Manipulator(int motorId){
         CANSparkMax motor = new CANSparkMax(motorId, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -30,7 +30,6 @@ public class Manipulator extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
-        //TODO make this work idk io stuff
     }
 
 }
