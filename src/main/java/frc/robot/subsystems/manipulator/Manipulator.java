@@ -9,7 +9,7 @@ public class Manipulator extends SubsystemBase {
     public ManipulatorIO io;
     public ManipulatorIO.ManipulatorIOInputs inputs;
     public int motorId;
-
+    
     public Manipulator(ManipulatorIO io, int motorId){
         this.io = io;
         this.motorId = motorId;
