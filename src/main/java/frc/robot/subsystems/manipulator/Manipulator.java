@@ -9,7 +9,7 @@ public class Manipulator extends SubsystemBase {
     public ManipulatorIO io;
     public ManipulatorIO.ManipulatorIOInputs inputs;
     public int motorId;
-    
+
     public Manipulator(ManipulatorIO io, int motorId){
         this.io = io;
         this.motorId = motorId;
@@ -24,6 +24,7 @@ public class Manipulator extends SubsystemBase {
 
     public void init() {
         setDefaultCommand(new SetManipulatorSpeed(this, 0.05));
+        //TODO probably am not supposed to use init as it does nothing lol
     }
 
 
