@@ -62,7 +62,7 @@ public class RobotContainer {
       var FLTurnEncoderId = 8;
       var BRTurnEncoderId = 9;
 
-      var gyroID = 10;
+      var gyroID = 20;
     switch (Constants.currentMode) {
       // Real robot, instantiate hardware IO implementations
       case REAL:
@@ -71,7 +71,7 @@ public class RobotContainer {
                   new ModuleIOFalcon500(BLTurnMotorId, BLDriveMotorId, false, false, BLTurnEncoderId),
                   new ModuleIOFalcon500(FLTurnMotorId, FLDriveMotorId, false, false, FLTurnEncoderId),
                   new ModuleIOFalcon500(BRTurnMotorId, BRDriveMotorId, false, false, BRTurnEncoderId),
-                  new GyroIOReal(gyroID),
+                  new GyroIOReal(gyroID, "rio"),
                   new VisionIOPhoton());
         flywheel = new Flywheel(new FlywheelIOSparkMax());
         break;

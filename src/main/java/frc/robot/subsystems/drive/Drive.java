@@ -32,7 +32,7 @@ public class Drive extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
   private final VisionIO visionIO;
-  private final VisionIOInputsAutoLogged visionInputs = new VisionIOInputsAutoLogged();
+  private final VisionIO.VisionIOInputs visionInputs = new VisionIO.VisionIOInputs();
   private final CameraCamera alterCam = new CameraCamera();
 
   public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(3.0);
@@ -127,15 +127,15 @@ public class Drive extends SubsystemBase {
     photonPoseEstimator.setPrimaryStrategy(PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP);
     photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
     var visionPose = photonPoseEstimator.update(visionInputs.cameraResult);
-    visionPose.ifPresent(estimatedRobotPose ->
-            estimatedRobotPose.targetsUsed.forEach(photonTrackedTarget ->
-                    Logger.getInstance().recordOutput(
-                            "Tag " + photonTrackedTarget.hashCode(),
-                            new Pose3d(
-                                    photonTrackedTarget.getBestCameraToTarget().getTranslation(),
-                                    photonTrackedTarget.getBestCameraToTarget().getRotation()
-                            )
-                    )));
+//    visionPose.ifPresent(estimatedRobotPose ->
+//            estimatedRobotPose.targetsUsed.forEach(photonTrackedTarget ->
+//                    Logger.getInstance().recordOutput(
+//                            "Tag " + photonTrackedTarget.hashCode(),
+//                            new Pose3d(
+//                                    photonTrackedTarget.getBestCameraToTarget().getTranslation(),
+//                                    photonTrackedTarget.getBestCameraToTarget().getRotation()
+//                            )
+//                    )));
     visionPose.ifPresent(estimatedRobotPose -> poseEstimator.addVisionMeasurement(
             estimatedRobotPose.estimatedPose.toPose2d(),
             estimatedRobotPose.timestampSeconds

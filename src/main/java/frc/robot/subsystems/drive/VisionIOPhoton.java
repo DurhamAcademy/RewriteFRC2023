@@ -8,11 +8,13 @@ public class VisionIOPhoton implements VisionIO {
     public void updateInputs(VisionIOInputs inputs) {
         var latest = camera.getLatestResult();
         inputs.driverMode = camera.getDriverMode();
-        inputs.bestTarget = latest.getBestTarget();
+        inputs.hasTargets = latest.hasTargets();
+        if (inputs.hasTargets) {
+            inputs.bestTarget = latest.getBestTarget();
+        }
         inputs.targets = latest.getTargets();
         inputs.latencyMillis = latest.getLatencyMillis();
         inputs.timestampSeconds = latest.getTimestampSeconds();
-        inputs.hasTargets = latest.hasTargets();
         inputs.LEDMode = camera.getLEDMode();
         inputs.cameraMatrix = camera.getCameraMatrix();
         inputs.cameraResult = latest;
