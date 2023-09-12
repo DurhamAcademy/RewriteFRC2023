@@ -9,26 +9,16 @@ import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 
 public class ManipulatorIOSparkMax implements ManipulatorIO {
-    public static final double GEAR_RATIO = 1;
-    public static final int deviceId = 6; //TODO fill this in
+    public static final int deviceId = 31;
     private final CANSparkMax motor;
-    private final RelativeEncoder encoder;
-    private final SparkMaxPIDController pid;
 
     public ManipulatorIOSparkMax(){
         motor = new CANSparkMax(deviceId, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-        encoder = motor.getEncoder();
-        pid = motor.getPIDController();
-
         motor.restoreFactoryDefaults();
-
-        motor.setInverted(false);
-
-        motor.enableVoltageCompensation(12.0);
-        motor.setSmartCurrentLimit(30);
-
-        motor.burnFlash();
+        motor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 10);
+        motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 20);
     }
 
     @Override
@@ -39,25 +29,18 @@ public class ManipulatorIOSparkMax implements ManipulatorIO {
         inputs.appliedVolts = motor.getAppliedOutput() * RobotController.getBatteryVoltage();
         inputs.currentAmps = new double[] {motor.getOutputCurrent()};
     }
-
-    @Override
-    public void setVelocity(double velocityRadPerSec, double ffVolts) {
-        pid.setReference(
-                Units.radiansPerSecondToRotationsPerMinute(velocityRadPerSec)
-                        * GEAR_RATIO,
-                CANSparkMax.ControlType.kVelocity, 0, ffVolts, SparkMaxPIDController.ArbFFUnits.kVoltage);
+    public void setMotorVoltage(double voltage) {
+        motor.setVoltage(voltage);
     }
+
+    public void setPercentage(double percentage) {
+        motor.set(percentage);
+    }
+
 
     @Override
     public void stop() {
         motor.stopMotor();
     }
 
-    @Override
-    public void configurePID(double kP, double kI, double kD) {
-        pid.setP(kP, 0);
-        pid.setI(kI, 0);
-        pid.setD(kD, 0);
-        pid.setFF(0, 0);
-    }
 }

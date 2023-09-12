@@ -16,6 +16,6 @@ public class SetManipulatorSpeed extends CommandBase {
     }
 
     public void execute() {
-        manipulator.inputs.velocityRadPerSec = speed;
+        manipulator.setMotorPercentage(speed);
     }
 }
