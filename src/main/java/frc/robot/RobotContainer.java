@@ -24,6 +24,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 import java.io.IOException;
 
+import static edu.wpi.first.math.MathUtil.applyDeadband;
+
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -32,103 +34,106 @@ import java.io.IOException;
  * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // Subsystems
-  private final Drive drive;
-  private final Flywheel flywheel;
+    // Subsystems
+    private final Drive drive;
+    private final Flywheel flywheel;
 
-  // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+    // Controller
+    private final CommandXboxController controller = new CommandXboxController(0);
 
-  // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
-  private final LoggedDashboardNumber flywheelSpeedInput = new LoggedDashboardNumber("Flywheel Speed", 1500.0);
+    // Dashboard inputs
+    private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+    private final LoggedDashboardNumber flywheelSpeedInput = new LoggedDashboardNumber("Flywheel Speed", 1500.0);
+    int n = 0;
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
-  public RobotContainer() throws IOException {
-      var FRDriveMotorId = 10;
-      var BLDriveMotorId = 11;
-      var FLDriveMotorId = 12;
-      var BRDriveMotorId = 13;
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
+    public RobotContainer() throws IOException {
+        var FRDriveMotorId = 10;
+        var BLDriveMotorId = 11;
+        var FLDriveMotorId = 12;
+        var BRDriveMotorId = 13;
 
-      var FRTurnMotorId = 14;
-      var BLTurnMotorId = 15;
-      var FLTurnMotorId = 16;
-      var BRTurnMotorId = 17;
+        var FRTurnMotorId = 14;
+        var BLTurnMotorId = 15;
+        var FLTurnMotorId = 16;
+        var BRTurnMotorId = 17;
 
-      var FRTurnEncoderId = 6;
-      var BLTurnEncoderId = 7;
-      var FLTurnEncoderId = 8;
-      var BRTurnEncoderId = 9;
+        var FRTurnEncoderId = 6;
+        var BLTurnEncoderId = 7;
+        var FLTurnEncoderId = 8;
+        var BRTurnEncoderId = 9;
 
-      var gyroID = 20;
-    switch (Constants.currentMode) {
-      // Real robot, instantiate hardware IO implementations
-      case REAL:
-          drive = new Drive(
-                  new ModuleIOFalcon500(FRTurnMotorId, FRDriveMotorId, false, false, FRTurnEncoderId),
-                  new ModuleIOFalcon500(BLTurnMotorId, BLDriveMotorId, false, false, BLTurnEncoderId),
-                  new ModuleIOFalcon500(FLTurnMotorId, FLDriveMotorId, false, false, FLTurnEncoderId),
-                  new ModuleIOFalcon500(BRTurnMotorId, BRDriveMotorId, false, false, BRTurnEncoderId),
-                  new GyroIOReal(gyroID, "rio"),
-                  new VisionIOPhoton());
-        flywheel = new Flywheel(new FlywheelIOSparkMax());
-        break;
+        var gyroID = 20;
+        switch (Constants.currentMode) {
+            // Real robot, instantiate hardware IO implementations
+            case REAL:
+                drive = new Drive(
+                        new ModuleIOFalcon500(FRTurnMotorId, FRDriveMotorId, false, false, FRTurnEncoderId),
+                        new ModuleIOFalcon500(BLTurnMotorId, BLDriveMotorId, false, false, BLTurnEncoderId),
+                        new ModuleIOFalcon500(FLTurnMotorId, FLDriveMotorId, false, false, FLTurnEncoderId),
+                        new ModuleIOFalcon500(BRTurnMotorId, BRDriveMotorId, false, false, BRTurnEncoderId),
+                        new GyroIOReal(gyroID, "rio"),
+                        new VisionIOPhoton());
+                flywheel = new Flywheel(new FlywheelIOSparkMax());
+                break;
 
-      // Sim robot, instantiate physics sim IO implementations
-      case SIM:
-          var gyroSim = new GyroIOSim(new Translation2d[]{new Translation2d(1.0, 1.0),
-                  new Translation2d(1.0, -1.0),
-                  new Translation2d(-1.0, 1.0),
-                  new Translation2d(-1.0, -1.0)});
-          drive = new Drive(new ModuleIOSim(0, gyroSim), new ModuleIOSim(1, gyroSim), new ModuleIOSim(2, gyroSim), new ModuleIOSim(3, gyroSim), gyroSim, new VisionIO() {
-          });
-        flywheel = new Flywheel(new FlywheelIOSim());
-        break;
+            // Sim robot, instantiate physics sim IO implementations
+            case SIM:
+                var gyroSim = new GyroIOSim(new Translation2d[]{new Translation2d(1.0, 1.0),
+                        new Translation2d(1.0, -1.0),
+                        new Translation2d(-1.0, 1.0),
+                        new Translation2d(-1.0, -1.0)});
+                drive = new Drive(new ModuleIOSim(0, gyroSim), new ModuleIOSim(1, gyroSim), new ModuleIOSim(2, gyroSim), new ModuleIOSim(3, gyroSim), gyroSim, new VisionIO() {
+                });
+                flywheel = new Flywheel(new FlywheelIOSim());
+                break;
 
-      // Replayed robot, disable IO implementations
-      default:
-          drive = new Drive(new ModuleIO() {
-          }, new ModuleIO() {
-          }, new ModuleIO() {
-          }, new ModuleIO() {
-          }, new GyroIO() {
-          }, new VisionIO() {
-          });
-        flywheel = new Flywheel(new FlywheelIO() {
-        });
-        break;
+            // Replayed robot, disable IO implementations
+            default:
+                drive = new Drive(new ModuleIO() {
+                }, new ModuleIO() {
+                }, new ModuleIO() {
+                }, new ModuleIO() {
+                }, new GyroIO() {
+                }, new VisionIO() {
+                });
+                flywheel = new Flywheel(new FlywheelIO() {
+                });
+                break;
+        }
+
+        // Set up auto routines
+        autoChooser.addDefaultOption("Do Nothing", new InstantCommand());
+        autoChooser.addOption("Spin", new SpinAuto(drive));
+        autoChooser.addOption("Drive With Flywheel", new DriveWithFlywheelAuto(drive, flywheel));
+
+        // Configure the button bindings
+        configureButtonBindings();
     }
 
-    // Set up auto routines
-    autoChooser.addDefaultOption("Do Nothing", new InstantCommand());
-    autoChooser.addOption("Spin", new SpinAuto(drive));
-    autoChooser.addOption("Drive With Flywheel", new DriveWithFlywheelAuto(drive, flywheel));
+    /**
+     * Use this method to define your button->command mappings. Buttons can be
+     * created by instantiating a {@link GenericHID} or one of its subclasses
+     * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then
+     * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+     */
+    private void configureButtonBindings() {
+        drive.setDefaultCommand(
+                new RunCommand(() -> {
+                    drive.driveArcade(applyDeadband(controller.getLeftX(), 0.05), applyDeadband(controller.getLeftY(), 0.05), applyDeadband(controller.getRightX(), 0.05), true);
+                }, drive));
+        controller.a()
+                .whileTrue(new StartEndCommand(() -> flywheel.runVelocity(flywheelSpeedInput.get()), flywheel::stop, flywheel));
+    }
 
-    // Configure the button bindings
-    configureButtonBindings();
-  }
-
-  /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by instantiating a {@link GenericHID} or one of its subclasses
-   * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then
-   * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    drive.setDefaultCommand(
-            new RunCommand(() -> drive.driveArcade(controller.getLeftX(), controller.getLeftY(), controller.getRightX(), true), drive));
-    controller.a()
-        .whileTrue(new StartEndCommand(() -> flywheel.runVelocity(flywheelSpeedInput.get()), flywheel::stop, flywheel));
-  }
-
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return autoChooser.get();
-  }
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        return autoChooser.get();
+    }
 }

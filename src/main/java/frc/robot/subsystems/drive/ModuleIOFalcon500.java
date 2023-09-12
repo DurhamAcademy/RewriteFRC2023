@@ -9,7 +9,7 @@ import static com.ctre.phoenix.motorcontrol.NeutralMode.Brake;
 import static com.ctre.phoenix.motorcontrol.NeutralMode.Coast;
 
 public class ModuleIOFalcon500 implements ModuleIO {
-  private static final double DRIVE_GEAR_RATIO = 6.0;
+  private static final double DRIVE_GEAR_RATIO = 6.75;
   private static final double TURN_GEAR_RATIO = 6.0;
   private static final double TICKS_PER_REV = 2048;
 
@@ -62,7 +62,7 @@ public class ModuleIOFalcon500 implements ModuleIO {
     inputs.turnTempCelsius =
             new double[]{turnMotor.getTemperature()};
 
-    inputs.turnAbsolutePositionRad = turnEncoder.getAbsolutePosition();
+    inputs.turnAbsolutePositionRad = Units.degreesToRadians(turnEncoder.getAbsolutePosition());
   }
 
   /**

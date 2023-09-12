@@ -65,6 +65,10 @@ public class Drive extends SubsystemBase {
   double testTime = 0.0;
   ProfiledPIDController anglePid;
   SimpleMotorFeedforward angleFF;
+
+  ProfiledPIDController drivePid;
+  SimpleMotorFeedforward driveFF;
+
   double lastTime = Timer.getFPGATimestamp();
 
   /**
@@ -105,9 +109,18 @@ public class Drive extends SubsystemBase {
             new TrapezoidProfile.Constraints(PI * 4,
                     PI * 8));
 
-    anglePid.enableContinuousInput(-Math.PI, Math.PI);
+    anglePid.enableContinuousInput(-PI, PI);
 
     angleFF = new SimpleMotorFeedforward(.25928, .28217, .0050137);
+
+
+    drivePid = new ProfiledPIDController(
+            2.37,
+            0.0,
+            0.0,
+            new TrapezoidProfile.Constraints(25.0, 1000.0)// TODO: Fix these
+    );
+    driveFF = new SimpleMotorFeedforward(0.20285, 2.2335, 0.34271);
   }
 
   @Override
@@ -176,6 +189,16 @@ public class Drive extends SubsystemBase {
     );
     var speeds = kinematics.toSwerveModuleStates(chassisSpeeds);
     for (int i = 0; i < speeds.length; i++) {
+      speeds[i] = SwerveModuleState.optimize(speeds[i], Rotation2d.fromRadians(inputs[i].turnAbsolutePositionRad));
+    }
+//    SwerveDriveKinematics.desaturateWheelSpeeds(
+//            /* moduleStates = */ swerveModuleStates,
+//            /* currentChassisSpeed = */ currentChassisSpeeds,
+//            /* attainableMaxModuleSpeedMetersPerSecond = */ 4.0,
+//            /* attainableMaxTranslationalSpeedMetersPerSecond = */ 4.0,
+//            /* attainableMaxRotationalVelocityRadiansPerSecond = */ Math.PI,
+//            );
+    for (int i = 0; i < speeds.length; i++) {
       var speed = speeds[i];
       moduleIOs[i].setDriveVoltage(speed.speedMetersPerSecond);
       var rad = speed.angle.getRadians();
@@ -189,10 +212,54 @@ public class Drive extends SubsystemBase {
               anglePid.getSetpoint().velocity,
               Constants.loopPeriodSecs//minOf(dt,0.001) // stop possible divide by zero?
       );
-      moduleIOs[i].setTurnVoltage(anglePower);
+      moduleIOs[i].setTurnVoltage(-anglePower);
     }
 
-    Logger.getInstance().recordOutput("Swerve Intensions", speeds);
+    Logger.getInstance().recordOutput("Swerve Intentions", speeds);
+  }
+
+  public void driveArcadePID(double xSpeed, double ySpeed, double zRotation, boolean fieldRelative) {
+    var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+            new ChassisSpeeds(xSpeed, ySpeed, zRotation),//.slewLimited(xSlewRateLimiter, ySlewRateLimiter, rotSlewRateLimiter),
+            getPose().getRotation()
+    );
+    var speeds = kinematics.toSwerveModuleStates(chassisSpeeds);
+//    SwerveDriveKinematics.desaturateWheelSpeeds(
+//            /* moduleStates = */ swerveModuleStates,
+//            /* currentChassisSpeed = */ currentChassisSpeeds,
+//            /* attainableMaxModuleSpeedMetersPerSecond = */ 4.0,
+//            /* attainableMaxTranslationalSpeedMetersPerSecond = */ 4.0,
+//            /* attainableMaxRotationalVelocityRadiansPerSecond = */ Math.PI,
+//            );
+    for (int i = 0; i < speeds.length; i++) {
+      var speed = speeds[i];
+      var rad = speed.angle.getRadians();
+
+      var lastVel = anglePid.getSetpoint().velocity;
+      var t = Timer.getFPGATimestamp();
+      var dt = t - lastTime;
+      var pid = anglePid.calculate(inputs[i].turnAbsolutePositionRad, rad);
+      var anglePower = -(pid) + angleFF.calculate(
+              lastVel,
+              anglePid.getSetpoint().velocity,
+              Constants.loopPeriodSecs//minOf(dt,0.001) // stop possible divide by zero?
+      );
+      moduleIOs[i].setTurnVoltage(anglePower);
+
+
+      var WHEEL_CIRCUMFERENCE = .0497 * 2 * PI;
+      var drivePower =
+              drivePid.calculate(
+                      inputs[i].driveVelocityRadPerSec * WHEEL_CIRCUMFERENCE,
+                      speed.speedMetersPerSecond
+              ) + driveFF.calculate(
+                      drivePid.getSetpoint().position,
+                      drivePid.getSetpoint().velocity
+              );
+      moduleIOs[i].setDriveVoltage(drivePower);
+    }
+
+    Logger.getInstance().recordOutput("Swerve Intentions", speeds);
   }
 
   /** Stops the drive. */

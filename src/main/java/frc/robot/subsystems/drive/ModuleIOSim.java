@@ -24,6 +24,7 @@ public class ModuleIOSim implements ModuleIO {
     public ModuleIOSim(int id, GyroIOSim gyroSim) {
         this.id = Optional.of(id);
         this.gyroSim = Optional.ofNullable(gyroSim);
+
     }
 
     public ModuleIOSim() {
@@ -68,7 +69,7 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     public void setTurnVoltage(double volts) {
-        turnAppliedVolts = MathUtil.clamp(volts, -1.0, 1.0);
+        turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
         turnSim.setInputVoltage(turnAppliedVolts - (turnSim.getAngularVelocityRadPerSec() * 0.005));
     }
 }

@@ -75,7 +75,7 @@ public interface VisionIO {
             table.put("LatencyMillis", latencyMillis);
             table.put("TimestampSeconds", timestampSeconds);
             table.put("HasTargets", hasTargets);
-            table.put("LEDMode", LEDMode.name());
+            table.put("LEDMode", ((LEDMode == null) ? VisionLEDMode.kDefault : LEDMode).name());
             table.put("CameraMatrix", cameraMatrix.isPresent() ? cameraMatrix.get().getData() : new double[0]);
             table.put("DistanceCoefficients", distanceCoefficients.isPresent() ? distanceCoefficients.get().getData() : new double[0]);
             var bestTargetTable = table.getSubtable("BestTarget");
