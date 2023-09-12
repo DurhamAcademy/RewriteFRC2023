@@ -6,8 +6,6 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ManipulatorIO {
     @AutoLog
     public static class ManipulatorIOInputs {
-        public double positionRad = 0.0;
-        public double velocityRadPerSec = 0.0;
         public double appliedVolts = 0.0;
         public double[] currentAmps = new double[] {0.0};
     }
