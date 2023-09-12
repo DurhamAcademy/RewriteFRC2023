@@ -33,4 +33,11 @@ public class Manipulator extends SubsystemBase {
         io.updateInputs(inputs);
     }
 
+    public void setMotorVoltage(double voltage) {
+        io.setVoltage(voltage);
+    }
+
+    public void setMotorPercent(double percentage) {
+        io.setPercentage(percentage);
+    }
 }
