@@ -23,9 +23,6 @@ public class ManipulatorIOSparkMax implements ManipulatorIO {
 
     @Override
     public void updateInputs(ManipulatorIOInputs inputs) {
-        inputs.positionRad = Units.rotationsToRadians(encoder.getPosition() / GEAR_RATIO);
-        inputs.velocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(
-                encoder.getVelocity() / GEAR_RATIO);
         inputs.appliedVolts = motor.getAppliedOutput() * RobotController.getBatteryVoltage();
         inputs.currentAmps = new double[] {motor.getOutputCurrent()};
     }
