@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -11,8 +13,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import java.io.IOException;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -44,7 +45,7 @@ public class Robot extends LoggedRobot {
         logger.recordMetadata("GitDirty", "All changes committed");
         break;
       case 1:
-        logger.recordMetadata("GitDirty", "Uncomitted changes");
+        logger.recordMetadata("GitDirty", "Uncommitted changes");
         break;
       default:
         logger.recordMetadata("GitDirty", "Unknown");
@@ -56,6 +57,7 @@ public class Robot extends LoggedRobot {
       // Running on a real robot, log to a USB stick
       case REAL:
         logger.addDataReceiver(new WPILOGWriter("/media/sda1/"));
+        logger.addDataReceiver(new WPILOGWriter("/media/sda2/"));
         logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -82,7 +84,11 @@ public class Robot extends LoggedRobot {
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
-    robotContainer = new RobotContainer();
+    try {
+      robotContainer = new RobotContainer();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /** This function is called periodically during all modes. */
@@ -94,6 +100,7 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    robotContainer.periodic();
   }
 
   /** This function is called once when the robot is disabled. */

@@ -165,3 +165,14 @@ simgui*.json
 
 # Version file
 src/main/java/frc/robot/BuildConstants.java
+/*.wpilog
+/.idea/vcs.xml
+/.idea/gradle.xml
+/.idea/jarRepositories.xml
+/.idea/misc.xml
+/.glass/glass.json
+/.idea/modules.xml
+/networktables.json
+/.idea/modules/RewriteFRC2023.main.iml
+/.idea/modules/RewriteFRC2023.test.iml
+/.idea/compiler.xml
