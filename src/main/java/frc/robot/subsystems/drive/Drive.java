@@ -49,10 +49,10 @@ public class Drive extends SubsystemBase {
                     new SwerveModulePosition(0, new Rotation2d()),
                     new SwerveModulePosition(0, new Rotation2d())},
             new Pose2d());
-    private final double[] offset = new double[]{-4.414796707534875,
-            -5.833728936329093,
-            -5.522330836388308,
-            -5.927301764390117};
+    private final double[] offset = new double[]{-2.478912953223196,
+            -1.2854759002481673,
+            -2.7642333797699257,
+            -2.799514937891295};
     PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(
             AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField(),
             PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP,

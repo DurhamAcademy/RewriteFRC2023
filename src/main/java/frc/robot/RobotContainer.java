@@ -70,9 +70,9 @@ public class RobotContainer {
             case REAL:
                 battery = new BatteryIORio();
                 drive = new Drive(
+                        new ModuleIOFalcon500(FLTurnMotorId, FLDriveMotorId, false, false, FLTurnEncoderId),
                         new ModuleIOFalcon500(FRTurnMotorId, FRDriveMotorId, false, false, FRTurnEncoderId),
                         new ModuleIOFalcon500(BLTurnMotorId, BLDriveMotorId, false, false, BLTurnEncoderId),
-                        new ModuleIOFalcon500(FLTurnMotorId, FLDriveMotorId, false, false, FLTurnEncoderId),
                         new ModuleIOFalcon500(BRTurnMotorId, BRDriveMotorId, false, false, BRTurnEncoderId),
                         new GyroIOReal(gyroID, "rio"),
                         new VisionIOPhoton());
