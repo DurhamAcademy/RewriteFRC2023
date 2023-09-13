@@ -34,6 +34,9 @@ public class ModuleIOFalcon500 implements ModuleIO {
     turnMotor.configAllSettings(config);
     driveMotor.configAllSettings(config);
 
+    driveMotor.setNeutralMode(Brake);
+    turnMotor.setNeutralMode(Brake);
+
     turnMotor.setInverted(turnInvert);
     driveMotor.setInverted(driveInvert);
 
@@ -88,8 +91,6 @@ public class ModuleIOFalcon500 implements ModuleIO {
 
   /**
    * Enable or disable brake mode on the drive motor.
-   *
-   * @param enable
    */
   @Override
   public void setDriveBrakeMode(boolean enable) {
@@ -98,8 +99,6 @@ public class ModuleIOFalcon500 implements ModuleIO {
 
   /**
    * Enable or disable brake mode on the turn motor.
-   *
-   * @param enable
    */
   @Override
   public void setTurnBrakeMode(boolean enable) {
