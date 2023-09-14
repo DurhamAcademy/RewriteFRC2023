@@ -17,6 +17,10 @@ import frc.robot.subsystems.battery.BatteryIOInputsAutoLogged;
 import frc.robot.subsystems.battery.BatteryIORio;
 import frc.robot.subsystems.battery.BatteryIOSim;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIOSparkMax;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -34,6 +38,7 @@ import static edu.wpi.first.math.MathUtil.applyDeadband;
 public class RobotContainer {
     // Subsystems
     private final Drive drive;
+    private final Intake intake;
 //    private final Flywheel flywheel;
 
     // Controller
@@ -76,6 +81,7 @@ public class RobotContainer {
                         new ModuleIOFalcon500(BRTurnMotorId, BRDriveMotorId, false, false, BRTurnEncoderId),
                         new GyroIOReal(gyroID, "rio"),
                         new VisionIOPhoton());
+                intake = new Intake(new IntakeIOSparkMax());
 //                flywheel = new Flywheel(new FlywheelIOSparkMax());
                 break;
 
@@ -94,6 +100,7 @@ public class RobotContainer {
                         gyroSim,
                         new VisionIO() {
                         });
+                intake = new Intake(new IntakeIOSim());
 //                flywheel = new Flywheel(new FlywheelIOSim());
                 break;
 
@@ -107,6 +114,8 @@ public class RobotContainer {
                 }, new ModuleIO() {
                 }, new GyroIO() {
                 }, new VisionIO() {
+                });
+                intake = new Intake(new IntakeIO() {
                 });
 //                flywheel = new Flywheel(new FlywheelIO() {
 //                });
