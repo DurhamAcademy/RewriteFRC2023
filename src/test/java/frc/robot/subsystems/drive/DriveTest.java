@@ -1,7 +1,10 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.wpilibj.Timer;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Random;
@@ -129,20 +132,20 @@ class DriveTest {
         Assertions.assertNotEquals(0.0, drive.getPose().getY());
     }
 
-    @Test
-    @Disabled("Rotation does not work")
-    @DisplayName("getPose() Rotation Getter Test")
-    void getPoseRot() {
-        Assertions.assertEquals(0.0, drive.getPose().getRotation().getRadians());
-
-        drive.testMode = true;
-        drive.testTime = Timer.getFPGATimestamp();
-        for (int i = 0; i < 50; i++) {
-            drive.periodic();
-            drive.testTime += 0.02;
-        }
-
-        System.out.println(drive.getPose());
-        Assertions.assertNotEquals(0.0, drive.getPose().getRotation().getRadians());
-    }
+//    @Test
+//    @Disabled("Rotation does not work")
+//    @DisplayName("getPose() Rotation Getter Test")
+//    void getPoseRot() {
+//        Assertions.assertEquals(0.0, drive.getPose().getRotation().getRadians());
+//
+//        drive.testMode = true;
+//        drive.testTime = Timer.getFPGATimestamp();
+//        for (int i = 0; i < 50; i++) {
+//            drive.periodic();
+//            drive.testTime += 0.02;
+//        }
+//
+//        System.out.println(drive.getPose());
+//        Assertions.assertNotEquals(0.0, drive.getPose().getRotation().getRadians());
+//    }
 }

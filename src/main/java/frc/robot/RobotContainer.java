@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.SpinAuto;
+import frc.robot.commands.ZeroModeMotor;
 import frc.robot.subsystems.battery.BatteryIO;
 import frc.robot.subsystems.battery.BatteryIOInputsAutoLogged;
 import frc.robot.subsystems.battery.BatteryIORio;
@@ -38,6 +39,7 @@ import static edu.wpi.first.math.MathUtil.applyDeadband;
 public class RobotContainer {
     // Subsystems
     private final Drive drive;
+    @SuppressWarnings("FieldCanBeLocal")
     private final Intake intake;
 //    private final Flywheel flywheel;
 
@@ -50,6 +52,8 @@ public class RobotContainer {
     // Battery IO
     BatteryIO battery;
     BatteryIOInputsAutoLogged batteryInputs = new BatteryIOInputsAutoLogged();
+    ZeroModeMotor zeroModeMotor;
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -129,6 +133,7 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
+        zeroModeMotor = new ZeroModeMotor(intake);
     }
 
     /**
@@ -156,5 +161,9 @@ public class RobotContainer {
     public void periodic() {
         this.battery.updateInputs(batteryInputs);
         Logger.getInstance().processInputs("Battery", batteryInputs);
+    }
+
+    public Command getStartCommand() {
+        return zeroModeMotor;
     }
 }

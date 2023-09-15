@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
+import edu.wpi.first.math.util.Units;
 
 import static com.revrobotics.CANSparkMax.IdleMode.kBrake;
 import static com.revrobotics.CANSparkMaxLowLevel.MotorType.kBrushless;
@@ -54,7 +55,7 @@ public class IntakeIOSparkMax implements IntakeIO {
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
-        inputs.deployEncoderPosition = deployEncoder.getPosition();
+        inputs.deployEncoderPosition = Units.rotationsToRadians(deployEncoder.getPosition());
         inputs.deployMotorOutputCurrent = deployMotor.getOutputCurrent();
 
         inputs.intakeMotorSpeed = intakeMotor.getEncoder().getVelocity();

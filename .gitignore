@@ -165,6 +165,8 @@ simgui*.json
 
 # Version file
 src/main/java/frc/robot/BuildConstants.java
+
+# Others
 /*.wpilog
 /.idea/vcs.xml
 /.idea/gradle.xml

@@ -24,14 +24,19 @@ import java.io.IOException;
  */
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
+  private Command startCommand;
+
   private RobotContainer robotContainer;
 
   /**
    * This function is run when the robot is first started up and should be used
    * for any initialization code.
    */
+  @SuppressWarnings("DataFlowIssue")
   @Override
   public void robotInit() {
+
+
     Logger logger = Logger.getInstance();
 
     // Record metadata
@@ -89,6 +94,9 @@ public class Robot extends LoggedRobot {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+
+
+    startCommand = robotContainer.getStartCommand();
   }
 
   /** This function is called periodically during all modes. */
@@ -123,7 +131,7 @@ public class Robot extends LoggedRobot {
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
-      autonomousCommand.schedule();
+      startCommand.andThen(autonomousCommand).schedule();
     }
   }
 
@@ -142,6 +150,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+
+    startCommand.schedule();
   }
 
   /** This function is called periodically during operator control. */
